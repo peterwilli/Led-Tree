@@ -10,8 +10,8 @@ GPIO.setmode(GPIO.BOARD)
 PINS_IN = {
 	'pir1': 8,
 	'pir2': 10,	
-	'pir4': 11,
-	'pir3': 12,
+	'pir3': 11,
+	#'pir4': 11,
 	'nacht': 13,
 	'soundSensor': 15
 }
@@ -41,8 +41,14 @@ def playAudio(filename):
 	 
 def init_pir_pins():
 	global PIR_PINS
-	for pin in PINS_IN.values():
-		PIR_PINS.append(pin)
+	for key in PINS_IN.keys():
+		pir_idx = 0
+		try:
+			pir_idx = key.index("pir")
+		except ValueError:
+			pir_idx = -1
+		if pir_idx == 0:
+			PIR_PINS.append(PINS_IN[key])
 
 def init_pins():
 	for v in PINS_IN.values():
@@ -106,13 +112,17 @@ def rainbow_tick():
 		rainbow_tick_timestamp = time.time() + 1
 			
 def checkPirs():
-	global color_fade, sex, rainbow_tick_timestamp
+	global color_fade, rainbow_tick_timestamp
 	triggered_count = 0	
+	idx = 0
 	for pin in PIR_PINS:
 		i = GPIO.input(pin)
+		print "%d triggered: %d" % (idx, i == 1)
 		if i == 1:
 			triggered_count += 1
-	color_fade = True
+		idx += 1
+			
+	color_fade = False
 	if triggered_count == 4:
 		if time.time() > rainbow_tick_timestamp:
 			rainbow_tick()	
@@ -124,6 +134,8 @@ def checkPirs():
 		setLedColor('4DB1DB')
 	if triggered_count == 3:
 		setLedColor('6CDB4D')
+		
+	time.sleep(1)
 							
 def loop():
 	while True:
