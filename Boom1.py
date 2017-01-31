@@ -80,6 +80,7 @@ def colorFadeTick():
 		r = colorTo[0]
 		g = colorTo[1]
 		b = colorTo[2]
+		print "Set led color to: %s:%s:%s" % (r, g, b)
 		
 	#print "Set led color to: %s:%s:%s" % (r, g, b), colorFrom, colorTo
 	rPWM.ChangeDutyCycle(r)
@@ -102,7 +103,7 @@ def rainbow_tick():
 	global rainbow_tick_idx, rainbow_tick_status, rainbow_tick_timestamp, steps
 	rainbow_tick_status = (rainbow_tick_status + 1) % 2
 	if rainbow_tick_status == 1:
-		randomColor = ['A8032D', '4DB1DB', '6CDB4D']
+		randomColor = ['FF0000', '0000FF', '00FF00']
 		rainbow_tick_idx = (rainbow_tick_idx + 1) % len(randomColor)
 		randomColor = randomColor[rainbow_tick_idx]
 		setLedColor(randomColor)
@@ -122,20 +123,22 @@ def checkPirs():
 			triggered_count += 1
 		idx += 1
 			
-	color_fade = False
+	color_fade = True
+	#triggered_count = 2
+	
 	if triggered_count == 4:
 		if time.time() > rainbow_tick_timestamp:
+			color_fade = False
 			rainbow_tick()	
+	print "total triggered: %d" % triggered_count 
 	if triggered_count == 0:
 		setLedColor('000000')
 	if triggered_count == 1:
-		setLedColor('A8032D')
+		setLedColor('FF0000')
 	if triggered_count == 2:
-		setLedColor('4DB1DB')
+		setLedColor('0000FF')
 	if triggered_count == 3:
-		setLedColor('6CDB4D')
-		
-	time.sleep(1)
+		setLedColor('00FF00')
 							
 def loop():
 	while True:
@@ -149,4 +152,8 @@ init_pir_pins()
 try:
 	loop()
 finally:
+	rPWM.stop()  
+	gPWM.stop()  
+	bPWM.stop()  
 	GPIO.cleanup()
+
